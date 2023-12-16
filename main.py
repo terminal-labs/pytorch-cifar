@@ -67,7 +67,8 @@ print('==> Building model..')
 # net = SENet18()
 # net = ShuffleNetV2(1)
 # net = EfficientNetB0()
-net = RegNetX_200MF()
+# net = RegNetX_200MF()
+net = SimpleDLA()
 net = net.to(device)
 if device == 'cuda':
     net = torch.nn.DataParallel(net)
@@ -85,10 +86,10 @@ if args.resume:
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr,
                       momentum=0.9, weight_decay=5e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
+
 
 # Training
-
-
 def train(epoch):
     print('\nEpoch: %d' % epoch)
     net.train()
@@ -150,3 +151,4 @@ def test(epoch):
 for epoch in range(start_epoch, start_epoch+200):
     train(epoch)
     test(epoch)
+    scheduler.step()
